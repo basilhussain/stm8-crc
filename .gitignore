@@ -1,0 +1,22 @@
+# Obj and bin files
+*.adb
+*.asm
+*.lst
+*.rel
+*.rst
+*.sym
+*.cdb
+*.hex
+*.lk
+*.map
+bin/*
+obj/*
+
+# Code::Blocks project
+*.cbp
+*.depend
+*.layout
+
+# Other stuff
+ansicon/*
+sim.bat
