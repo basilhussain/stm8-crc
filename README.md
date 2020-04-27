@@ -46,7 +46,7 @@ for(size_t i = 0; i < (sizeof(data) / sizeof(data[0])); i++) {
 
 ## Function Reference
 
-```c
+```
 crc8_1wire_init()
 crc16_ansi_init()
 crc16_ccitt_init()
@@ -64,9 +64,9 @@ Note: the 'init' functions are actually macro definitions, so you may use them a
 
 # Benchmarks
 
-To benchmark the optimised assembly implementations, they were compared with the execution speed of equivalent plain C implementations. Each function was run for 10,000 iterations, on each iteration updating the CRC value with a fixed data byte of `0x55`. Code was compiled using SDCC's default 'balanced' optimisation level. The benchmark was ran using the μCsim microcontroller simulator included with SDCC. The number of clock cycles consumed by the entire iteration loop (i.e. not including initial value assignment) was measured using the timer commands of μCsim.
+To benchmark the optimised assembly implementations, they were compared with the execution speed of equivalent plain C implementations. Each function was run for 10,000 iterations, on each iteration updating the CRC value with a fixed data byte of `0x55`. Code was compiled using SDCC's default 'balanced' optimisation level. The benchmark was ran using the [μCsim](http://mazsola.iit.uni-miskolc.hu/~drdani/embedded/ucsim/) microcontroller simulator included with SDCC. The number of clock cycles consumed by the entire iteration loop (i.e. not including initial value assignment) was measured using the timer commands of μCsim.
 
-Implementation | C cycles | ASM cycles | Ratio
+Implementation | C Cycles | ASM Cycles | Ratio
 -------------- | -------- | ---------- | -----
 CRC8-1WIRE | 1,680,003 | 590,015 | 35.1%
 CRC16-ANSI | 1,918,718 | 789,366 | 41.1%
@@ -74,7 +74,7 @@ CRC16-CCITT | 1,929,246 | 789,630 | 40.1%
 CRC16-XMODEM† | | |
 CRC32 | 2,971,486 | 1,151,339 | 38.7%
 
-*(† See CCITT - algorithm same; only differs by initial value)*
+*(† See CCITT - algorithm is the same; only differs by initial value)*
 
 Overall, the optimised assembly implementations execute in roughly 40% the time of the reference C implementations.
 
