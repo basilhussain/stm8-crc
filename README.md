@@ -12,13 +12,38 @@ Implementations are included for the following CRC types:
 
 Because this library targets the STM8 embedded microcontroller family, in order to keep the compiled code size fairly compact, the bitwise computation technique is used. Various table-lookup techniques exist that provide faster computation, but these are generally not suitable for memory-constrained embedded environments, so this library does not use them.
 
-The assembly code in this library has been written to accomodate code being compiled for both 'medium' (16-bit address space) and 'large' (24-bit address space) STM8 memory models. Simply use the relevant SDCC compiler command-line arguments (i.e. `--model-medium` or `--model-large`) and the library code will be adapted accordingly.
-
 In addition to the library functions, code is also included for plain C reference implementations of each CRC function, as well as a test and benchmarking program.
+
+# Setup
+
+You may either use a pre-compiled version of the library, or build the library code yourself. See below for further details.
+
+This library has been written to accomodate and provide for both 'medium' (16-bit address space) and 'large' (24-bit address space) STM8 memory models.
+
+* If you are building your project with either no specific SDCC memory model option, or the `--model-medium` option, then use the non-suffixed `crc.lib` library file.
+* If you are building with `--model-large`, then use the `crc-large.lib` library file.
+
+Unsure? If your target STM8 microcontroller model has less than 32KB of flash memory, then choose the former version; if larger flash, then you probably want the latter.
+
+## Pre-compiled Library
+
+1. Extract the relevant `.lib` file (see above) and `crc.h` file from the release archive.
+2. Copy the two files to your project.
+
+## Building
+
+This library is developed and built with the [Code::Blocks](http://codeblocks.org/) IDE and [SDCC](http://sdcc.sourceforge.net/) compiler.
+
+1. Load the `.cbp` project file in Code::Blocks.
+2. Select the appropriate 'Library' build target for your STM8 memory model (see above) from the drop-down list on the compiler toolbar (or the *Build > Select Target* menu).
+3. Build the library by pressing the 'Build' icon on the compiler toolbar (or Ctrl-F9 keyboard shortcut, or *Build > Build* menu entry).
+4. Upon successful compilation, the resultant `.lib` file will be in the main base folder.
+5. Copy the `.lib` file and the `crc.h` file to your project.
 
 # Usage
 
-To use the library in your software, copy the `crc.c` and `crc.h` files in to your project and include the `crc.h` file in your code wherever you want to use the CRC functions.
+1. Include the `crc.h` file in your C code wherever you want to use the CRC functions.
+2. When compiling, provide the path to the `.lib` file with the `-l` SDCC command-line option.
 
 For each CRC type, there are two functions provided: one that gives the appropriate initial value for that CRC variant, and one for incrementally computing the CRC on a byte-by-byte basis.
 
@@ -27,7 +52,7 @@ To calculate a CRC:
 1. Declare a variable of appropriate type (`uint8_t` for CRC8, `uint16_t` for CRC16, `uint32_t` for CRC32) to hold the CRC value, and assign its initial value using the relevant 'init' function. **Always assign the initial value this way, or you may end up computing incorrect CRC values!**
 2. For each byte of data that you wish to compute the CRC for, call the relevant 'update' function, passing the existing CRC variable value, and the data byte. The function will return a new CRC value, which should be re-assigned to the CRC variable.
 
-Please note that no functions are provided for computing a CRC across a buffer of data, because such code is not only trivial to write but also bloats the library with potentially unwanted code. (At time of writing, SDCC does not perform unused function removal when linking, so such functions would unnecessarily take up space if unused.)
+Please note that no functions are provided for computing a CRC across a buffer of data, because such code is not only trivial to write but also bloats the library with potentially unneeded code.
 
 ## Example
 
