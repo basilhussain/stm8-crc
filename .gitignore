@@ -22,4 +22,5 @@ obj/*
 
 # Other stuff
 ansicon/*
-sim.bat
+*.bat
+*.zip
