@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="STM8 CRC" />
+		<Option pch_mode="2" />
+		<Option compiler="sdcc" />
+		<Build>
+			<Target title="Library (Medium)">
+				<Option output="crc.lib" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="obj/Library-Medium" />
+				<Option type="2" />
+				<Option compiler="sdcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-DASM_UNROLL_LOOP" />
+				</Compiler>
+			</Target>
+			<Target title="Library (Large)">
+				<Option output="crc-large.lib" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="obj/Library-Large" />
+				<Option type="2" />
+				<Option compiler="sdcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="--model-large" />
+					<Add option="-DASM_UNROLL_LOOP" />
+				</Compiler>
+			</Target>
+			<Target title="Test">
+				<Option output="bin/Test/test.hex" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="obj/Test/" />
+				<Option type="5" />
+				<Option compiler="sdcc" />
+				<Compiler>
+					<Add option="--out-fmt-ihx" />
+					<Add option="--model-large" />
+					<Add option="--debug" />
+					<Add option="-DF_CPU=16000000UL" />
+				</Compiler>
+				<Linker>
+					<Add library="crc-large.lib" />
+				</Linker>
+			</Target>
+		</Build>
+		<VirtualTargets>
+			<Add alias="All" targets="Library (Medium);Library (Large);Test;" />
+		</VirtualTargets>
+		<Compiler>
+			<Add option="-mstm8" />
+			<Add option="--std-c99" />
+		</Compiler>
+		<Unit filename="crc.h" />
+		<Unit filename="crc/crc16_ansi.c">
+			<Option compilerVar="CC" />
+			<Option target="Library (Large)" />
+			<Option target="Library (Medium)" />
+		</Unit>
+		<Unit filename="crc/crc16_ccitt.c">
+			<Option compilerVar="CC" />
+			<Option target="Library (Large)" />
+			<Option target="Library (Medium)" />
+		</Unit>
+		<Unit filename="crc/crc32.c">
+			<Option compilerVar="CC" />
+			<Option target="Library (Large)" />
+			<Option target="Library (Medium)" />
+		</Unit>
+		<Unit filename="crc/crc8_1wire.c">
+			<Option compilerVar="CC" />
+			<Option target="Library (Large)" />
+			<Option target="Library (Medium)" />
+		</Unit>
+		<Unit filename="crc_ref.c">
+			<Option compilerVar="CC" />
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="crc_ref.h">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="uart.c">
+			<Option compilerVar="CC" />
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="uart.h">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="uart_regs.h">
+			<Option target="Test" />
+		</Unit>
+		<Extensions>
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

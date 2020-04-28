@@ -6,16 +6,18 @@
 *.rst
 *.sym
 *.cdb
-*.hex
 *.lk
 *.map
+*.hex
+*.ihx
+*.s19
+*.elf
+*.lib
 bin/*
 obj/*
 
-# Code::Blocks project
-*.cbp
+# Code::Blocks temp stuff
 *.depend
-*.layout
 
 # Other stuff
 ansicon/*
