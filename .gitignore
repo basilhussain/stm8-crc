@@ -16,8 +16,9 @@
 bin/*
 obj/*
 
-# Code::Blocks temp stuff
+# Code::Blocks project stuff
 *.depend
+*.layout
 
 # Other stuff
 ansicon/*
