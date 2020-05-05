@@ -114,8 +114,8 @@ CRC8-SAE-J1850 | 1,859,943 | 590,015 | 31.7%
 CRC16-ANSI | 1,918,718 | 789,366 | 41.1%
 CRC16-CCITT | 1,929,246 | 789,630 | 40.1%
 CRC16-XMODEM† | | |
-CRC32 | 2861480 | 1091333 | 38.1%
-CRC32-POSIX | 2770430 | 1090388 | 39.4%
+CRC32 | 2,861,480 | 1,091,333 | 38.1%
+CRC32-POSIX | 2,770,430 | 1,090,388 | 39.4%
 
 *(† See CCITT - algorithm is the same; only differs by initial value)*
 
