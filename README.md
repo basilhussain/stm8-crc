@@ -53,6 +53,7 @@ To calculate a CRC:
 
 1. Declare a variable of appropriate type (`uint8_t` for CRC8, `uint16_t` for CRC16, `uint32_t` for CRC32) to hold the CRC value, and assign its initial value using the relevant 'init' function. **Always assign the initial value this way, or you may end up computing incorrect CRC values!**
 2. For each byte of data that you wish to compute the CRC for, call the relevant 'update' function, passing the existing CRC variable value, and the data byte. The function will return a new CRC value, which should be re-assigned to the CRC variable.
+3. Lastly, call the relevant 'final' function, passing the current CRC value. It will return the finalised CRC value. **Again, do not miss this step, or the CRC value may be incorrect!** It should also be noted that you should not continue to update the CRC value (with 'update' function calls) once this function has been used.
 
 Please note that no functions are provided for computing a CRC across a buffer of data, because such code is not only trivial to write but also bloats the library with potentially unneeded code.
 
@@ -136,7 +137,7 @@ To attain the fastest execution, generally some trade-offs often have to be made
 * `crc32_update` (ASM): 187 bytes
 * `crc32_update_ref` (C): 95 bytes
 
-If you want to use these library functions but minimise the code size, it is possible to disable the loop unrolling by commenting-out the `ASM_UNROLL_LOOP` macro definition line in `crc.c` and re-compiling. While this will compromise the execution speed, it should still be faster than the reference C implementations.
+If you want to use these library functions but minimise the code size, it is possible to disable the loop unrolling by removing the `ASM_UNROLL_LOOP` macro definition from the Code::Blocks project build options and re-compiling. While this will compromise the execution speed, it should still be faster than the reference C implementations.
 
 # Licence
 
