@@ -39,6 +39,7 @@
 // CRC8-1WIRE (aka Dallas, Maxim, iButton)
 // Polynomial: x^8 + x^5 + x^4 + 1 (0x8C, reversed)
 // Initial value: 0x00
+// XOR out: 0x00
 
 uint8_t crc8_1wire_update(uint8_t crc, uint8_t data) __naked {
 	// Avoid compiler warnings for unreferenced args.

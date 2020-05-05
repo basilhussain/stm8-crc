@@ -42,6 +42,20 @@ uint8_t crc8_1wire_update_ref(uint8_t crc, uint8_t data) {
 	return crc;
 }
 
+uint8_t crc8_j1850_update_ref(uint8_t crc, uint8_t data) {
+	crc ^= data;
+
+	for(uint8_t i = 0; i < 8; i++) {
+		if(crc & 0x80) {
+			crc = (crc << 1) ^ 0x1D;
+		} else {
+			crc = (crc << 1);
+		}
+	}
+
+	return crc;
+}
+
 uint16_t crc16_ansi_update_ref(uint16_t crc, uint8_t data) {
 	crc ^= data;
 
@@ -71,7 +85,6 @@ uint16_t crc16_ccitt_update_ref(uint16_t crc, uint8_t data) {
 }
 
 uint32_t crc32_update_ref(uint32_t crc, uint8_t data) {
-	crc = ~crc;
 	crc ^= data;
 
 	for(uint8_t i = 0; i < 8; i++) {
@@ -82,5 +95,19 @@ uint32_t crc32_update_ref(uint32_t crc, uint8_t data) {
 		}
 	}
 
-	return ~crc;
+	return crc;
+}
+
+uint32_t crc32_posix_update_ref(uint32_t crc, uint8_t data) {
+	crc ^= (uint32_t)data << 24;
+
+	for(uint8_t i = 0; i < 8; i++) {
+		if(crc & 0x80000000UL) {
+			crc = (crc << 1) ^ 0x04C11DB7UL;
+		} else {
+			crc = (crc << 1);
+		}
+	}
+
+	return crc;
 }

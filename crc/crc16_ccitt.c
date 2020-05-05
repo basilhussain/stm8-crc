@@ -39,6 +39,7 @@
 // CRC16-CCITT
 // Polynomial: x^16 + x^12 + x^5 + 1 (0x1021, normal)
 // Initial value: 0xFFFF
+// XOR out: 0x0000
 
 uint16_t crc16_ccitt_update(uint16_t crc, uint8_t data) __naked {
 	// Avoid compiler warnings for unreferenced args.

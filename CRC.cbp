@@ -69,10 +69,20 @@
 			<Option target="Library (Large)" />
 			<Option target="Library (Medium)" />
 		</Unit>
+		<Unit filename="crc/crc32_posix.c">
+			<Option compilerVar="CC" />
+			<Option target="Library (Medium)" />
+			<Option target="Library (Large)" />
+		</Unit>
 		<Unit filename="crc/crc8_1wire.c">
 			<Option compilerVar="CC" />
 			<Option target="Library (Large)" />
 			<Option target="Library (Medium)" />
+		</Unit>
+		<Unit filename="crc/crc8_j1850.c">
+			<Option compilerVar="CC" />
+			<Option target="Library (Medium)" />
+			<Option target="Library (Large)" />
 		</Unit>
 		<Unit filename="crc_ref.c">
 			<Option compilerVar="CC" />

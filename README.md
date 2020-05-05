@@ -5,10 +5,12 @@ This is a library providing CRC8, CRC16 and CRC32 computation functions for the 
 Implementations are included for the following CRC types:
 
 * CRC8-1WIRE (aka Dallas, Maxim, iButton)
+* CRC8-SAE-J1850 (aka OBD)
 * CRC16-ANSI (aka IBM, Modbus, USB)
 * CRC16-CCITT
 * CRC16-XMODEM
-* CRC32 (aka Ethernet, GZIP, PKZIP, PNG, ZMODEM)
+* CRC32 (aka GZIP, PKZIP, PNG, ZMODEM)
+* CRC32-POSIX (aka cksum)
 
 Because this library targets the STM8 embedded microcontroller family, in order to keep the compiled code size fairly compact, the bitwise computation technique is used. Various table-lookup techniques exist that provide faster computation, but these are generally not suitable for memory-constrained embedded environments, so this library does not use them.
 
@@ -67,37 +69,53 @@ uint16_t crc = crc16_ccitt_init();
 for(size_t i = 0; i < (sizeof(data) / sizeof(data[0])); i++) {
 	crc = crc16_ccitt_update(crc, data[i]);
 }
+
+crc = crc16_ccitt_final(crc);
 ```
 
 ## Function Reference
 
 ```
-crc8_1wire_init()
-crc16_ansi_init()
-crc16_ccitt_init()
-crc16_xmodem_init()
-crc32_init()
+uint8_t crc8_1wire_init()
+uint8_t crc8_j1850_init()
+uint16_t crc16_ansi_init()
+uint16_t crc16_ccitt_init()
+uint16_t crc16_xmodem_init()
+uint32_t crc32_init()
+uint32_t crc32_posix_init()
 
 uint8_t crc8_1wire_update(uint8_t crc, uint8_t data)
+uint8_t crc8_j1850_update(uint8_t crc, uint8_t data)
 uint16_t crc16_ansi_update(uint16_t crc, uint8_t data)
 uint16_t crc16_ccitt_update(uint16_t crc, uint8_t data)
 uint16_t crc16_xmodem_update(uint16_t crc, uint8_t data)
 uint32_t crc32_update(uint32_t crc, uint8_t data)
+uint32_t crc32_posix_update(uint32_t crc, uint8_t data)
+
+uint8_t crc8_1wire_final(crc)
+uint8_t crc8_j1850_final(crc)
+uint16_t crc16_ansi_final(crc)
+uint16_t crc16_ccitt_final(crc)
+uint16_t crc16_xmodem_final(crc)
+uint32_t crc32_final(crc)
+uint32_t crc32_posix_final(crc)
 ```
 
-Note: the 'init' functions are actually macro definitions, so you may use them anywhere that a literal constant value is valid (e.g. initialisation of an array).
+Note: the 'init' functions are actually macro definitions, so you may use them anywhere that a literal constant value is valid (e.g. initialisation of an array). The 'final' functions are also macros, but are not suitable for use in this way - rather, they are macros for the purposes of compiler optimisation.
 
 # Benchmarks
 
-To benchmark the optimised assembly implementations, they were compared with the execution speed of equivalent plain C implementations. Each function was run for 10,000 iterations, on each iteration updating the CRC value with a fixed data byte of `0x55`. Code was compiled using SDCC's default 'balanced' optimisation level. The benchmark was ran using the [μCsim](http://mazsola.iit.uni-miskolc.hu/~drdani/embedded/ucsim/) microcontroller simulator included with SDCC. The number of clock cycles consumed by the entire iteration loop (i.e. not including initial value assignment) was measured using the timer commands of μCsim.
+To benchmark the optimised assembly implementations, they were compared with the execution speed of equivalent plain C implementations. Each function was run for 10,000 iterations, on each iteration updating the CRC value with a fixed data byte of `0x55`. Code was compiled using SDCC's default 'balanced' optimisation level. The benchmark was ran using the [μCsim](http://mazsola.iit.uni-miskolc.hu/~drdani/embedded/ucsim/) microcontroller simulator included with SDCC. The number of clock cycles consumed by all iterations of the loop (but not including initial value assignment or final XOR-out) was measured using the timer commands of μCsim.
 
 Implementation | C Cycles | ASM Cycles | Ratio
 -------------- | -------- | ---------- | -----
 CRC8-1WIRE | 1,680,003 | 590,015 | 35.1%
+CRC8-SAE-J1850 | 1,859,943 | 590,015 | 31.7%
 CRC16-ANSI | 1,918,718 | 789,366 | 41.1%
 CRC16-CCITT | 1,929,246 | 789,630 | 40.1%
 CRC16-XMODEM† | | |
-CRC32 | 2,971,486 | 1,151,339 | 38.7%
+CRC32 | 2861480 | 1091333 | 38.1%
+CRC32-POSIX | 2770430 | 1090388 | 39.4%
 
 *(† See CCITT - algorithm is the same; only differs by initial value)*
 
@@ -109,14 +127,14 @@ For the code used in the reference C implementations, see the `crc_ref.c` file. 
 
 # Code Size
 
-To attain the fastest execution, generally some trade-offs often have to be made, and in the case of this library, it is at the expense of compiled code size. Primarily due to the use of loop-unrolling, the size of the assembly CRC functions are larger than their reference C counterparts, but not by an egregious amount - typically only roughly twice the size. For example:
+To attain the fastest execution, generally some trade-offs often have to be made, and in the case of this library, it is at the expense of compiled code size. Primarily due to the use of loop-unrolling, the size of the assembly CRC functions are larger than their reference C counterparts, but not by an egregious amount - typically only roughly twice the size. Some selected examples:
 
 * `crc8_1wire_update` (ASM): 45 bytes
 * `crc8_1wire_update_ref` (C): 41 bytes
 * `crc16_ansi_update` (ASM): 89 bytes
 * `crc16_ansi_update_ref` (C): 45 bytes
-* `crc32_update` (ASM): 198 bytes
-* `crc32_update_ref` (C): 109 bytes
+* `crc32_update` (ASM): 187 bytes
+* `crc32_update_ref` (C): 95 bytes
 
 If you want to use these library functions but minimise the code size, it is possible to disable the loop unrolling by commenting-out the `ASM_UNROLL_LOOP` macro definition line in `crc.c` and re-compiling. While this will compromise the execution speed, it should still be faster than the reference C implementations.
 

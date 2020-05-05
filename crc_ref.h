@@ -29,13 +29,15 @@
 
 #include <stdint.h>
 
-// XMODEM has same implementation as CCITT, just with different initial value,
-// so just alias it to the latter function.
+// These have the same implementations, just with different initial values, so
+// just alias them to the latter functions.
 #define crc16_xmodem_update_ref crc16_ccitt_update_ref
 
 extern uint8_t crc8_1wire_update_ref(uint8_t crc, uint8_t data);
+extern uint8_t crc8_j1850_update_ref(uint8_t crc, uint8_t data);
 extern uint16_t crc16_ansi_update_ref(uint16_t crc, uint8_t data);
 extern uint16_t crc16_ccitt_update_ref(uint16_t crc, uint8_t data);
 extern uint32_t crc32_update_ref(uint32_t crc, uint8_t data);
+extern uint32_t crc32_posix_update_ref(uint32_t crc, uint8_t data);
 
 #endif // CRC_REF_H_

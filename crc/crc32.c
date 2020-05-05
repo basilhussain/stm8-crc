@@ -36,9 +36,10 @@
 #define ASM_RETURN ret
 #endif
 
-// CRC32 (aka Ethernet, GZIP, PKZIP, PNG, ZMODEM)
+// CRC32 (aka GZIP, PKZIP, PNG, ZMODEM)
 // Polynomial: x^32 + x^26 + x^23 + x^22 + x^16 + x^12 + x^11 + x^10 + x^8 + x^7 + x^5 + x^4 + x^2 + x + 1 (0xEDB88320, reversed)
-// Initial value: 0x00000000
+// Initial value: 0xFFFFFFFF
+// XOR out: 0xFFFFFFFF
 
 uint32_t crc32_update(uint32_t crc, uint8_t data) __naked {
 	// Avoid compiler warnings for unreferenced args.
@@ -50,14 +51,6 @@ uint32_t crc32_update(uint32_t crc, uint8_t data) __naked {
 	// y = 0xAABB (yh = 0xAA, yl = 0xBB)
 
 	__asm
-		; Invert bits of CRC. We do it per byte, rather than with two CPLW
-		; instructions, because we can operate directly on the stack value
-		; of the variable.
-		cpl (ASM_ARGS_SP_OFFSET+2, sp)
-		cpl (ASM_ARGS_SP_OFFSET+3, sp)
-		cpl (ASM_ARGS_SP_OFFSET+0, sp)
-		cpl (ASM_ARGS_SP_OFFSET+1, sp)
-
 		; XOR the LSB of the CRC with data byte, and put it back in the CRC.
 		ld a, (ASM_ARGS_SP_OFFSET+4, sp)
 		xor a, (ASM_ARGS_SP_OFFSET+3, sp)
@@ -115,10 +108,6 @@ uint32_t crc32_update(uint32_t crc, uint8_t data) __naked {
 		jrne 0001$
 
 #endif
-
-		; Do a final inversion of CRC bits.
-		cplw x
-		cplw y
 
 		; The X and Y registers now contain updated CRC value, so leave them
 		; there as function return value.

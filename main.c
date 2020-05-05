@@ -40,16 +40,19 @@ typedef uint32_t (*crc32_update_func_t)(uint32_t crc, uint8_t data);
 typedef struct {
 	uint8_t init_val;
 	crc8_update_func_t update_func;
+	uint8_t xorout_val;
 } crc8_type_t;
 
 typedef struct {
 	uint16_t init_val;
 	crc16_update_func_t update_func;
+	uint16_t xorout_val;
 } crc16_type_t;
 
 typedef struct {
 	uint32_t init_val;
 	crc32_update_func_t update_func;
+	uint32_t xorout_val;
 } crc32_type_t;
 
 typedef struct {
@@ -82,20 +85,24 @@ typedef struct {
 #define debug_break() __asm__("break")
 
 static const crc8_type_t crc8_functions[] = {
-	{ crc8_1wire_init(), crc8_1wire_update_ref },
-	{ crc8_1wire_init(), crc8_1wire_update }
+	{ CRC8_1WIRE_INIT, crc8_1wire_update_ref, CRC8_1WIRE_XOROUT },
+	{ CRC8_1WIRE_INIT, crc8_1wire_update, CRC8_1WIRE_XOROUT },
+	{ CRC8_J1850_INIT, crc8_j1850_update_ref, CRC8_J1850_XOROUT },
+	{ CRC8_J1850_INIT, crc8_j1850_update, CRC8_J1850_XOROUT }
 };
 
 static const crc16_type_t crc16_functions[] = {
-	{ crc16_ansi_init(), crc16_ansi_update_ref },
-	{ crc16_ansi_init(), crc16_ansi_update },
-	{ crc16_ccitt_init(), crc16_ccitt_update_ref },
-	{ crc16_ccitt_init(), crc16_ccitt_update }
+	{ CRC16_ANSI_INIT, crc16_ansi_update_ref, CRC16_ANSI_XOROUT },
+	{ CRC16_ANSI_INIT, crc16_ansi_update, CRC16_ANSI_XOROUT },
+	{ CRC16_CCITT_INIT, crc16_ccitt_update_ref, CRC16_CCITT_XOROUT },
+	{ CRC16_CCITT_INIT, crc16_ccitt_update, CRC16_CCITT_XOROUT }
 };
 
 static const crc32_type_t crc32_functions[] = {
-	{ crc32_init(), crc32_update_ref },
-	{ crc32_init(), crc32_update },
+	{ CRC32_INIT, crc32_update_ref, CRC32_XOROUT },
+	{ CRC32_INIT, crc32_update, CRC32_XOROUT },
+	{ CRC32_POSIX_INIT, crc32_posix_update_ref, CRC32_POSIX_XOROUT },
+	{ CRC32_POSIX_INIT, crc32_posix_update, CRC32_POSIX_XOROUT }
 };
 
 static const uint8_t test_data_a[] = {
@@ -121,28 +128,56 @@ static const uint8_t test_data_b[] = {
 	0x44, 0x53, 0xBA, 0x1B, 0x16, 0x94, 0x4A, 0x9A, 0x95, 0xD5, 0x09, 0x83, 0x1C, 0x95, 0x7E, 0x06
 };
 
+// From SAE J1850 standard, section 5.4.1, table 1.
+static const uint8_t test_data_c[] = {
+	0x33, 0x22, 0x55, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF
+};
+
+// From Maxim Application Note 27
+// https://www.maximintegrated.com/en/design/technical-documents/app-notes/2/27.html
+static const uint8_t test_data_d[] = {
+	0x02, 0x1C, 0xB8, 0x01, 0x00, 0x00, 0x00
+};
+
 // All expected CRC values obtained from (and matching between) the following
 // calculators:
 // https://crccalc.com/
 // https://www.tahapaksu.com/crc/
 // https://www.scadacore.com/tools/programming-calculators/online-checksum-calculator/
+// http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
 
 static const crc8_test_t crc8_tests[] = {
 	{
 		.name = "crc8-1wire",
 		.data = test_data_a,
 		.data_len = sizeof(test_data_a),
-		.c_func = { crc8_1wire_init(), crc8_1wire_update_ref },
-		.asm_func = { crc8_1wire_init(), crc8_1wire_update },
+		.c_func = { CRC8_1WIRE_INIT, crc8_1wire_update_ref, CRC8_1WIRE_XOROUT },
+		.asm_func = { CRC8_1WIRE_INIT, crc8_1wire_update, CRC8_1WIRE_XOROUT },
 		.expected = 0x7C
 	},
 	{
 		.name = "crc8-1wire",
-		.data = test_data_b,
-		.data_len = sizeof(test_data_b),
-		.c_func = { crc8_1wire_init(), crc8_1wire_update_ref },
-		.asm_func = { crc8_1wire_init(), crc8_1wire_update },
-		.expected = 0xE3
+		.data = test_data_d,
+		.data_len = sizeof(test_data_d),
+		.c_func = { CRC8_1WIRE_INIT, crc8_1wire_update_ref, CRC8_1WIRE_XOROUT },
+		.asm_func = { CRC8_1WIRE_INIT, crc8_1wire_update, CRC8_1WIRE_XOROUT },
+		.expected = 0xA2
+	},
+	{
+		.name = "crc8-j1850",
+		.data = test_data_a,
+		.data_len = sizeof(test_data_a),
+		.c_func = { CRC8_J1850_INIT, crc8_j1850_update_ref, CRC8_J1850_XOROUT },
+		.asm_func = { CRC8_J1850_INIT, crc8_j1850_update, CRC8_J1850_XOROUT },
+		.expected = 0x04
+	},
+	{
+		.name = "crc8-j1850",
+		.data = test_data_c,
+		.data_len = sizeof(test_data_c),
+		.c_func = { CRC8_J1850_INIT, crc8_j1850_update_ref, CRC8_J1850_XOROUT },
+		.asm_func = { CRC8_J1850_INIT, crc8_j1850_update, CRC8_J1850_XOROUT },
+		.expected = 0xCB
 	}
 };
 
@@ -151,48 +186,48 @@ static const crc16_test_t crc16_tests[] = {
 		.name = "crc16-ansi",
 		.data = test_data_a,
 		.data_len = sizeof(test_data_a),
-		.c_func = { crc16_ansi_init(), crc16_ansi_update_ref },
-		.asm_func = { crc16_ansi_init(), crc16_ansi_update },
+		.c_func = { CRC16_ANSI_INIT, crc16_ansi_update_ref, CRC16_ANSI_XOROUT },
+		.asm_func = { CRC16_ANSI_INIT, crc16_ansi_update, CRC16_ANSI_XOROUT },
 		.expected = 0x2B0E
 	},
 	{
 		.name = "crc16-ansi",
 		.data = test_data_b,
 		.data_len = sizeof(test_data_b),
-		.c_func = { crc16_ansi_init(), crc16_ansi_update_ref },
-		.asm_func = { crc16_ansi_init(), crc16_ansi_update },
+		.c_func = { CRC16_ANSI_INIT, crc16_ansi_update_ref, CRC16_ANSI_XOROUT },
+		.asm_func = { CRC16_ANSI_INIT, crc16_ansi_update, CRC16_ANSI_XOROUT },
 		.expected = 0x4173
 	},
 	{
 		.name = "crc16-ccitt",
 		.data = test_data_a,
 		.data_len = sizeof(test_data_a),
-		.c_func = { crc16_ccitt_init(), crc16_ccitt_update_ref },
-		.asm_func = { crc16_ccitt_init(), crc16_ccitt_update },
+		.c_func = { CRC16_CCITT_INIT, crc16_ccitt_update_ref, CRC16_CCITT_XOROUT },
+		.asm_func = { CRC16_CCITT_INIT, crc16_ccitt_update, CRC16_CCITT_XOROUT },
 		.expected = 0x6EBB
 	},
 	{
 		.name = "crc16-ccitt",
 		.data = test_data_b,
 		.data_len = sizeof(test_data_b),
-		.c_func = { crc16_ccitt_init(), crc16_ccitt_update_ref },
-		.asm_func = { crc16_ccitt_init(), crc16_ccitt_update },
+		.c_func = { CRC16_CCITT_INIT, crc16_ccitt_update_ref, CRC16_CCITT_XOROUT },
+		.asm_func = { CRC16_CCITT_INIT, crc16_ccitt_update, CRC16_CCITT_XOROUT },
 		.expected = 0x61DE
 	},
 	{
 		.name = "crc16-xmodem",
 		.data = test_data_a,
 		.data_len = sizeof(test_data_a),
-		.c_func = { crc16_xmodem_init(), crc16_xmodem_update_ref },
-		.asm_func = { crc16_xmodem_init(), crc16_xmodem_update },
+		.c_func = { CRC16_XMODEM_INIT, crc16_xmodem_update_ref, CRC16_XMODEM_XOROUT },
+		.asm_func = { CRC16_XMODEM_INIT, crc16_xmodem_update, CRC16_XMODEM_XOROUT },
 		.expected = 0x5F85
 	},
 	{
 		.name = "crc16-xmodem",
 		.data = test_data_b,
 		.data_len = sizeof(test_data_b),
-		.c_func = { crc16_xmodem_init(), crc16_xmodem_update_ref },
-		.asm_func = { crc16_xmodem_init(), crc16_xmodem_update },
+		.c_func = { CRC16_XMODEM_INIT, crc16_xmodem_update_ref, CRC16_XMODEM_XOROUT },
+		.asm_func = { CRC16_XMODEM_INIT, crc16_xmodem_update, CRC16_XMODEM_XOROUT },
 		.expected = 0x2036
 	}
 };
@@ -202,17 +237,33 @@ static const crc32_test_t crc32_tests[] = {
 		.name = "crc32",
 		.data = test_data_a,
 		.data_len = sizeof(test_data_a),
-		.c_func = { crc32_init(), crc32_update_ref },
-		.asm_func = { crc32_init(), crc32_update },
+		.c_func = { CRC32_INIT, crc32_update_ref, CRC32_XOROUT },
+		.asm_func = { CRC32_INIT, crc32_update, CRC32_XOROUT },
 		.expected = 0x7FC76C2F
 	},
 	{
 		.name = "crc32",
 		.data = test_data_b,
 		.data_len = sizeof(test_data_b),
-		.c_func = { crc32_init(), crc32_update_ref },
-		.asm_func = { crc32_init(), crc32_update },
+		.c_func = { CRC32_INIT, crc32_update_ref, CRC32_XOROUT },
+		.asm_func = { CRC32_INIT, crc32_update, CRC32_XOROUT },
 		.expected = 0x791FF31F
+	},
+	{
+		.name = "crc32-posix",
+		.data = test_data_a,
+		.data_len = sizeof(test_data_a),
+		.c_func = { CRC32_POSIX_INIT, crc32_posix_update_ref, CRC32_POSIX_XOROUT },
+		.asm_func = { CRC32_POSIX_INIT, crc32_posix_update, CRC32_POSIX_XOROUT },
+		.expected = 0x93E5A427
+	},
+	{
+		.name = "crc32-posix",
+		.data = test_data_b,
+		.data_len = sizeof(test_data_b),
+		.c_func = { CRC32_POSIX_INIT, crc32_posix_update_ref, CRC32_POSIX_XOROUT },
+		.asm_func = { CRC32_POSIX_INIT, crc32_posix_update, CRC32_POSIX_XOROUT },
+		.expected = 0x4D84D9B6
 	}
 };
 
@@ -226,8 +277,9 @@ void print_hex(const void *data, const size_t data_len) {
 }
 
 void verify(void) {
-	static const char pass_str[] = "PASS";
-	static const char fail_str[] = "FAIL";
+	// Use ANSI terminal escape codes for highlighting pass/fail text.
+	static const char pass_str[] = "\x1B[1m\x1B[32mPASS\x1B[0m"; // Bold green
+	static const char fail_str[] = "\x1B[1m\x1B[31mFAIL\x1B[0m"; // Bold red
 	uint8_t crc_8_c, crc_8_asm;
 	uint16_t crc_16_c, crc_16_asm;
 	uint32_t crc_32_c, crc_32_asm;
@@ -249,6 +301,9 @@ void verify(void) {
 			crc_8_asm = (*crc8_tests[i].asm_func.update_func)(crc_8_asm, crc8_tests[i].data[n]);
 		}
 
+		crc_8_c ^= crc8_tests[i].c_func.xorout_val;
+		crc_8_asm ^= crc8_tests[i].asm_func.xorout_val;
+
 		printf("    c = 0x%02X - %s\n", crc_8_c, (crc_8_c == crc8_tests[i].expected ? pass_str : fail_str));
 		printf("    asm = 0x%02X - %s\n", crc_8_asm, (crc_8_asm == crc8_tests[i].expected ? pass_str : fail_str));
 	}
@@ -267,6 +322,9 @@ void verify(void) {
 			crc_16_c = (*crc16_tests[i].c_func.update_func)(crc_16_c, crc16_tests[i].data[n]);
 			crc_16_asm = (*crc16_tests[i].asm_func.update_func)(crc_16_asm, crc16_tests[i].data[n]);
 		}
+
+		crc_16_c ^= crc16_tests[i].c_func.xorout_val;
+		crc_16_asm ^= crc16_tests[i].asm_func.xorout_val;
 
 		printf("    c = 0x%04X - %s\n", crc_16_c, (crc_16_c == crc16_tests[i].expected ? pass_str : fail_str));
 		printf("    asm = 0x%04X - %s\n", crc_16_asm, (crc_16_asm == crc16_tests[i].expected ? pass_str : fail_str));
@@ -287,6 +345,9 @@ void verify(void) {
 			crc_32_asm = (*crc32_tests[i].asm_func.update_func)(crc_32_asm, crc32_tests[i].data[n]);
 		}
 
+		crc_32_c ^= crc32_tests[i].c_func.xorout_val;
+		crc_32_asm ^= crc32_tests[i].asm_func.xorout_val;
+
 		printf("    c = 0x%08lX - %s\n", crc_32_c, (crc_32_c == crc32_tests[i].expected ? pass_str : fail_str));
 		printf("    asm = 0x%08lX - %s\n", crc_32_asm, (crc_32_asm == crc32_tests[i].expected ? pass_str : fail_str));
 	}
@@ -297,12 +358,16 @@ void benchmark(const uint16_t iters) {
 	// Results, F_CPU 16 MHz, 10000 iterations:
 	// - crc8_1wire_update_ref = 0.21 sec (1680003 clks)
 	// - crc8_1wire_update = 0.0737519 sec (590015 clks)
+	// - crc8_j1850_update_ref = 0.232493 sec (1859943 clks)
+	// - crc8_j1850_update = 0.0737519 sec (590015 clks)
 	// - crc16_ansi_update_ref = 0.23984 sec (1918718 clks)
 	// - crc16_ansi_update = 0.0986708 sec (789366 clks)
 	// - crc16_ccitt_update_ref = 0.241156 sec (1929246 clks)
 	// - crc16_ccitt_update = 0.0987038 sec (789630 clks)
-	// - crc32_update_ref = 0.371436 sec (2971486 clks)
-	// - crc32_update = 0.143917 sec (1151339 clks)
+	// - crc32_update_ref = 0.357685 sec (2861480 clks)
+	// - crc32_update = 0.136417 sec (1091333 clks)
+	// - crc32_posix_update_ref = 0.346304 sec (2770430 clks)
+	// - crc32_posix_update = 0.136298 sec (1090388 clks)
 
 	uint8_t crc_8;
 	uint16_t crc_16, n;
@@ -318,6 +383,7 @@ void benchmark(const uint16_t iters) {
 			crc_8 = (*crc8_functions[i].update_func)(crc_8, 0x55);
 		}
 		debug_break();
+		crc_8 ^= crc8_functions[i].xorout_val;
 	}
 
 	for(size_t i = 0; i < (sizeof(crc16_functions) / sizeof(crc16_functions[0])); i++) {
@@ -328,6 +394,7 @@ void benchmark(const uint16_t iters) {
 			crc_16 = (*crc16_functions[i].update_func)(crc_16, 0x55);
 		}
 		debug_break();
+		crc_16 ^= crc16_functions[i].xorout_val;
 	}
 
 	for(size_t i = 0; i < (sizeof(crc32_functions) / sizeof(crc32_functions[0])); i++) {
@@ -338,6 +405,7 @@ void benchmark(const uint16_t iters) {
 			crc_32 = (*crc32_functions[i].update_func)(crc_32, 0x55);
 		}
 		debug_break();
+		crc_32 ^= crc32_functions[i].xorout_val;
 	}
 }
 
