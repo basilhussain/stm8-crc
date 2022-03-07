@@ -108,15 +108,15 @@ Note: the 'init' functions are actually macro definitions, so you may use them a
 
 To benchmark the optimised assembly implementations, they were compared with the execution speed of equivalent plain C implementations. Each function was run for 10,000 iterations, on each iteration updating the CRC value with a fixed data byte of `0x55`. Code was compiled using SDCC's default 'balanced' optimisation level. The benchmark was ran using the [μCsim](http://mazsola.iit.uni-miskolc.hu/~drdani/embedded/ucsim/) microcontroller simulator included with SDCC. The number of clock cycles consumed by all iterations of the loop (but not including initial value assignment or final XOR-out) was measured using the timer commands of μCsim.
 
-Implementation | C Cycles | ASM Cycles | Ratio
--------------- | -------- | ---------- | -----
-CRC8-1WIRE | 1,680,003 | 590,015 | 35.1%
-CRC8-SAE-J1850 | 1,859,943 | 590,015 | 31.7%
-CRC16-ANSI | 1,918,718 | 789,366 | 41.1%
-CRC16-CCITT | 1,929,246 | 789,630 | 40.1%
-CRC16-XMODEM† | | |
-CRC32 | 2,861,480 | 1,091,333 | 38.1%
-CRC32-POSIX | 2,770,430 | 1,090,388 | 39.4%
+| Implementation |  C Cycles | ASM Cycles | Ratio |
+| -------------- | --------: | ---------: | ----: |
+| CRC8-1WIRE     | 2,040,014 |    780,022 | 38.2% |
+| CRC8-SAE-J1850 | 1,900,004 |    780,022 | 41.1% |
+| CRC16-ANSI     | 2,368,888 |  1,069,374 | 45.1% |
+| CRC16-CCITT    | 2,351,174 |  1,070,598 | 45.5% |
+| CRC16-XMODEM†  |           |            |       |
+| CRC32          | 3,831,054 |  1,481,348 | 38.7% |
+| CRC32-POSIX    | 3,700,361 |  1,480,403 | 40.0% |
 
 *(† See CCITT - algorithm is the same; only differs by initial value)*
 
