@@ -2,7 +2,7 @@
  *
  * crc8_1wire.c - CRC8-1WIRE implementation
  *
- * Copyright (c) 2020 Basil Hussain
+ * Copyright (c) 2022 Basil Hussain
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,21 +27,14 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "../crc.h"
-
-#ifdef __SDCC_MODEL_LARGE
-#define ASM_ARGS_SP_OFFSET 4
-#define ASM_RETURN retf
-#else
-#define ASM_ARGS_SP_OFFSET 3
-#define ASM_RETURN ret
-#endif
+#include "common.h"
 
 // CRC8-1WIRE (aka Dallas, Maxim, iButton)
 // Polynomial: x^8 + x^5 + x^4 + 1 (0x8C, reversed)
 // Initial value: 0x00
 // XOR out: 0x00
 
-uint8_t crc8_1wire_update(uint8_t crc, uint8_t data) __naked {
+uint8_t crc8_1wire_update(uint8_t crc, uint8_t data) __naked __stack_args {
 	// Avoid compiler warnings for unreferenced args.
 	(void)crc;
 	(void)data;

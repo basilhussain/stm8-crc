@@ -2,7 +2,7 @@
  *
  * main.c - Test and benchmarking code for STM8 CRC library functions
  *
- * Copyright (c) 2020 Basil Hussain
+ * Copyright (c) 2022 Basil Hussain
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,9 +43,9 @@
 #define PC_CR1 (*(volatile uint8_t *)(0x500D))
 #define PC_CR1_C15 5
 
-typedef uint8_t (*crc8_update_func_t)(uint8_t crc, uint8_t data);
-typedef uint16_t (*crc16_update_func_t)(uint16_t crc, uint8_t data);
-typedef uint32_t (*crc32_update_func_t)(uint32_t crc, uint8_t data);
+typedef uint8_t (*crc8_update_func_t)(uint8_t crc, uint8_t data) __stack_args;
+typedef uint16_t (*crc16_update_func_t)(uint16_t crc, uint8_t data) __stack_args;
+typedef uint32_t (*crc32_update_func_t)(uint32_t crc, uint8_t data) __stack_args;
 
 typedef struct {
 	uint8_t init_val;
@@ -365,21 +365,6 @@ void verify(void) {
 }
 
 void benchmark(const uint16_t iters) {
-	// uCsim benchmark of CRC8/16/32 functions (C vs ASM w/ unrolled loops).
-	// Results, F_CPU 16 MHz, 10000 iterations:
-	// - crc8_1wire_update_ref = 0.21 sec (1680003 clks)
-	// - crc8_1wire_update = 0.0737519 sec (590015 clks)
-	// - crc8_j1850_update_ref = 0.232493 sec (1859943 clks)
-	// - crc8_j1850_update = 0.0737519 sec (590015 clks)
-	// - crc16_ansi_update_ref = 0.23984 sec (1918718 clks)
-	// - crc16_ansi_update = 0.0986708 sec (789366 clks)
-	// - crc16_ccitt_update_ref = 0.241156 sec (1929246 clks)
-	// - crc16_ccitt_update = 0.0987038 sec (789630 clks)
-	// - crc32_update_ref = 0.357685 sec (2861480 clks)
-	// - crc32_update = 0.136417 sec (1091333 clks)
-	// - crc32_posix_update_ref = 0.346304 sec (2770430 clks)
-	// - crc32_posix_update = 0.136298 sec (1090388 clks)
-
 	uint8_t crc_8;
 	uint16_t crc_16, n;
 	uint32_t crc_32;

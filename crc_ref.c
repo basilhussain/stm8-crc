@@ -2,7 +2,7 @@
  *
  * crc_ref.c - Implementation of plain C code CRC library reference functions
  *
- * Copyright (c) 2020 Basil Hussain
+ * Copyright (c) 2022 Basil Hussain
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@
 #include <stdint.h>
 #include "crc_ref.h"
 
-uint8_t crc8_1wire_update_ref(uint8_t crc, uint8_t data) {
+uint8_t crc8_1wire_update_ref(uint8_t crc, uint8_t data) __stack_args {
 	crc ^= data;
 
 	for(uint8_t i = 0; i < 8; i++) {
@@ -42,7 +42,7 @@ uint8_t crc8_1wire_update_ref(uint8_t crc, uint8_t data) {
 	return crc;
 }
 
-uint8_t crc8_j1850_update_ref(uint8_t crc, uint8_t data) {
+uint8_t crc8_j1850_update_ref(uint8_t crc, uint8_t data) __stack_args {
 	crc ^= data;
 
 	for(uint8_t i = 0; i < 8; i++) {
@@ -56,7 +56,7 @@ uint8_t crc8_j1850_update_ref(uint8_t crc, uint8_t data) {
 	return crc;
 }
 
-uint16_t crc16_ansi_update_ref(uint16_t crc, uint8_t data) {
+uint16_t crc16_ansi_update_ref(uint16_t crc, uint8_t data) __stack_args {
 	crc ^= data;
 
 	for(uint8_t i = 0; i < 8; i++) {
@@ -70,7 +70,7 @@ uint16_t crc16_ansi_update_ref(uint16_t crc, uint8_t data) {
 	return crc;
 }
 
-uint16_t crc16_ccitt_update_ref(uint16_t crc, uint8_t data) {
+uint16_t crc16_ccitt_update_ref(uint16_t crc, uint8_t data) __stack_args {
 	crc ^= (uint16_t)data << 8;
 
 	for(uint8_t i = 0; i < 8; i++) {
@@ -84,7 +84,7 @@ uint16_t crc16_ccitt_update_ref(uint16_t crc, uint8_t data) {
 	return crc;
 }
 
-uint32_t crc32_update_ref(uint32_t crc, uint8_t data) {
+uint32_t crc32_update_ref(uint32_t crc, uint8_t data) __stack_args {
 	crc ^= data;
 
 	for(uint8_t i = 0; i < 8; i++) {
@@ -98,7 +98,7 @@ uint32_t crc32_update_ref(uint32_t crc, uint8_t data) {
 	return crc;
 }
 
-uint32_t crc32_posix_update_ref(uint32_t crc, uint8_t data) {
+uint32_t crc32_posix_update_ref(uint32_t crc, uint8_t data) __stack_args {
 	crc ^= (uint32_t)data << 24;
 
 	for(uint8_t i = 0; i < 8; i++) {

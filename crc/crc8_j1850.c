@@ -2,7 +2,7 @@
  *
  * crc8_j1850.c - CRC8-SAE-J1850 implementation
  *
- * Copyright (c) 2020 Basil Hussain
+ * Copyright (c) 2022 Basil Hussain
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,21 +27,14 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "../crc.h"
-
-#ifdef __SDCC_MODEL_LARGE
-#define ASM_ARGS_SP_OFFSET 4
-#define ASM_RETURN retf
-#else
-#define ASM_ARGS_SP_OFFSET 3
-#define ASM_RETURN ret
-#endif
+#include "common.h"
 
 // CRC8-SAE-J1850 (aka OBD)
 // Polynomial: x^8 + x^4 + x^3 + x^2 + 1 (0x1D, normal)
 // Initial value: 0xFF
 // XOR out: 0xFF
 
-uint8_t crc8_j1850_update(uint8_t crc, uint8_t data) __naked {
+uint8_t crc8_j1850_update(uint8_t crc, uint8_t data) __naked __stack_args {
 	// Avoid compiler warnings for unreferenced args.
 	(void)crc;
 	(void)data;

@@ -54,6 +54,10 @@
 			<Add option="--std-c99" />
 		</Compiler>
 		<Unit filename="crc.h" />
+		<Unit filename="crc/common.h">
+			<Option target="Library (Medium)" />
+			<Option target="Library (Large)" />
+		</Unit>
 		<Unit filename="crc/crc16_ansi.c">
 			<Option compilerVar="CC" />
 			<Option target="Library (Large)" />

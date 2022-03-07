@@ -2,7 +2,7 @@
  *
  * crc16_ccitt.c - CRC16-CCITT implementation
  *
- * Copyright (c) 2020 Basil Hussain
+ * Copyright (c) 2022 Basil Hussain
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,21 +27,14 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "../crc.h"
-
-#ifdef __SDCC_MODEL_LARGE
-#define ASM_ARGS_SP_OFFSET 4
-#define ASM_RETURN retf
-#else
-#define ASM_ARGS_SP_OFFSET 3
-#define ASM_RETURN ret
-#endif
+#include "common.h"
 
 // CRC16-CCITT
 // Polynomial: x^16 + x^12 + x^5 + 1 (0x1021, normal)
 // Initial value: 0xFFFF
 // XOR out: 0x0000
 
-uint16_t crc16_ccitt_update(uint16_t crc, uint8_t data) __naked {
+uint16_t crc16_ccitt_update(uint16_t crc, uint8_t data) __naked __stack_args {
 	// Avoid compiler warnings for unreferenced args.
 	(void)crc;
 	(void)data;

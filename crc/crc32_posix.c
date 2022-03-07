@@ -2,7 +2,7 @@
  *
  * crc32_posix.c - CRC32-POSIX implementation
  *
- * Copyright (c) 2020 Basil Hussain
+ * Copyright (c) 2022 Basil Hussain
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,21 +27,14 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "../crc.h"
-
-#ifdef __SDCC_MODEL_LARGE
-#define ASM_ARGS_SP_OFFSET 4
-#define ASM_RETURN retf
-#else
-#define ASM_ARGS_SP_OFFSET 3
-#define ASM_RETURN ret
-#endif
+#include "common.h"
 
 // CRC32-POSIX (aka cksum)
 // Polynomial: x^32 + x^26 + x^23 + x^22 + x^16 + x^12 + x^11 + x^10 + x^8 + x^7 + x^5 + x^4 + x^2 + x + 1 (0x04C11DB7, normal)
 // Initial value: 0x00000000
 // XOR out: 0xFFFFFFFF
 
-uint32_t crc32_posix_update(uint32_t crc, uint8_t data) __naked {
+uint32_t crc32_posix_update(uint32_t crc, uint8_t data) __naked __stack_args {
 	// Avoid compiler warnings for unreferenced args.
 	(void)crc;
 	(void)data;

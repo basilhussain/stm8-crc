@@ -2,7 +2,7 @@
  *
  * crc.h - Header file for STM8 CRC library functions
  *
- * Copyright (c) 2020 Basil Hussain
+ * Copyright (c) 2022 Basil Hussain
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,18 @@
 #define CRC_H_
 
 #include <stdint.h>
+
+// Short-term fix to force usage of old ABI when compiled with SDCC v4.2.0
+// (or newer). New ABI passes simple arguments (e.g. one or two 8- or 16-bit
+// values) in A/X registers, versus previous where all args are on the stack.
+// Eventually, all assembly code should be changed to use new ABI. May actually
+// offer a performance increase, eliminating code that simply takes arg values
+// and loads them to A/X registers.
+#if defined(__SDCCCALL) && __SDCCCALL != 0
+#define __stack_args __sdcccall(0)
+#else
+#define __stack_args
+#endif
 
 // Initial values for the various CRC implementations.
 #define CRC8_1WIRE_INIT ((uint8_t)0x0)
@@ -72,11 +84,11 @@
 // just alias them to the latter functions.
 #define crc16_xmodem_update crc16_ccitt_update
 
-extern uint8_t crc8_1wire_update(uint8_t crc, uint8_t data);
-extern uint8_t crc8_j1850_update(uint8_t crc, uint8_t data);
-extern uint16_t crc16_ansi_update(uint16_t crc, uint8_t data);
-extern uint16_t crc16_ccitt_update(uint16_t crc, uint8_t data);
-extern uint32_t crc32_update(uint32_t crc, uint8_t data);
-extern uint32_t crc32_posix_update(uint32_t crc, uint8_t data);
+extern uint8_t crc8_1wire_update(uint8_t crc, uint8_t data) __naked __stack_args;
+extern uint8_t crc8_j1850_update(uint8_t crc, uint8_t data) __naked __stack_args;
+extern uint16_t crc16_ansi_update(uint16_t crc, uint8_t data) __naked __stack_args;
+extern uint16_t crc16_ccitt_update(uint16_t crc, uint8_t data) __naked __stack_args;
+extern uint32_t crc32_update(uint32_t crc, uint8_t data) __naked __stack_args;
+extern uint32_t crc32_posix_update(uint32_t crc, uint8_t data) __naked __stack_args;
 
 #endif // CRC_H_
