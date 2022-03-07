@@ -1,0 +1,3 @@
+break rom w 0x500A
+timer add benchmark
+commands 1 timer stop benchmark; timer get benchmark; timer set benchmark 0; timer start benchmark; run

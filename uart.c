@@ -24,6 +24,7 @@
  *
  ******************************************************************************/
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include "uart.h"
@@ -55,9 +56,43 @@ const static uart_baud_cfg_t uart_baud_cfg[] = {
 #endif
 };
 
+static uart_putchar_func_t uart_putchar_func = NULL;
+static uart_getchar_func_t uart_getchar_func = NULL;
+
 /******************************************************************************/
 
 int putchar(int c) {
+	if(uart_putchar_func != NULL) {
+		return uart_putchar_func(c);
+	} else {
+		return c;
+	}
+}
+
+int getchar(void) {
+	if(uart_getchar_func != NULL) {
+		return uart_getchar_func();
+	} else {
+		return EOF;
+	}
+}
+
+void uart_init(const uart_baud_enum_t baud, uart_putchar_func_t put_func, uart_getchar_func_t get_func) {
+	// Configure BRR for specified baud rate. BRR2 must be set first.
+	UART1_BRR2 = uart_baud_cfg[baud].brr2;
+	UART1_BRR1 = uart_baud_cfg[baud].brr1;
+
+	UART1_CR1 = 0; // Default of UART enabled, 8 data bits, no parity
+	UART1_CR3 = 0; // Default of 1 stop bit
+	UART1_CR4 = 0;
+	UART1_CR5 = 0;
+	UART1_CR2 = (1U << UART1_CR2_REN) | (1U << UART1_CR2_TEN); // Enable RX & TX.
+
+	uart_putchar_func = put_func;
+	uart_getchar_func = get_func;
+}
+
+int uart_putchar(int c) {
 	// When binary mode is not set and character to transmit is LF, send a CR
 	// preceding it.
 	// if(c == '\n') putchar('\r');
@@ -70,7 +105,7 @@ int putchar(int c) {
 	return c;
 }
 
-int getchar(void) {
+int uart_getchar(void) {
 	// Wait until a character has been received.
 	while(!(UART1_SR & (1U << UART1_SR_RXNE)));
 
@@ -82,16 +117,4 @@ int getchar(void) {
 	} else {
 		return UART1_DR;
 	}
-}
-
-void uart_init(const uart_baud_enum_t baud) {
-	// Configure BRR for specified baud rate. BRR2 must be set first.
-	UART1_BRR2 = uart_baud_cfg[baud].brr2;
-	UART1_BRR1 = uart_baud_cfg[baud].brr1;
-
-	UART1_CR1 = 0; // Default of UART enabled, 8 data bits, no parity
-	UART1_CR3 = 0; // Default of 1 stop bit
-	UART1_CR4 = 0;
-	UART1_CR5 = 0;
-	UART1_CR2 = (1U << UART1_CR2_REN) | (1U << UART1_CR2_TEN); // Enable RX & TX.
 }

@@ -105,6 +105,13 @@
 		<Unit filename="uart_regs.h">
 			<Option target="Test" />
 		</Unit>
+		<Unit filename="ucsim.c">
+			<Option compilerVar="CC" />
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="ucsim.h">
+			<Option target="Test" />
+		</Unit>
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

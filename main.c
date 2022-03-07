@@ -28,10 +28,20 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "uart.h"
+#include "ucsim.h"
 #include "crc.h"
 #include "crc_ref.h"
 
 #define CLK_CKDIVR (*(volatile uint8_t *)(0x50C6))
+
+// PC5 is connected to the built-in LED on the STM8S208 Nucleo-64 board.
+// Toggling this pin is used for benchmarking.
+#define PC_ODR (*(volatile uint8_t *)(0x500A))
+#define PC_ODR_ODR5 5
+#define PC_DDR (*(volatile uint8_t *)(0x500C))
+#define PC_DDR_DDR5 5
+#define PC_CR1 (*(volatile uint8_t *)(0x500D))
+#define PC_CR1_C15 5
 
 typedef uint8_t (*crc8_update_func_t)(uint8_t crc, uint8_t data);
 typedef uint16_t (*crc16_update_func_t)(uint16_t crc, uint8_t data);
@@ -82,7 +92,8 @@ typedef struct {
 	uint32_t expected;
 } crc32_test_t;
 
-#define debug_break() __asm__("break")
+#define benchmark_marker_start() do { PC_ODR |= (1 << PC_ODR_ODR5); } while(0)
+#define benchmark_marker_end() do { PC_ODR &= ~(1 << PC_ODR_ODR5); } while(0)
 
 static const crc8_type_t crc8_functions[] = {
 	{ CRC8_1WIRE_INIT, crc8_1wire_update_ref, CRC8_1WIRE_XOROUT },
@@ -378,40 +389,47 @@ void benchmark(const uint16_t iters) {
 	for(size_t i = 0; i < (sizeof(crc8_functions) / sizeof(crc8_functions[0])); i++) {
 		n = iters;
 		crc_8 = crc8_functions[i].init_val;
-		debug_break();
+		benchmark_marker_start();
 		while(n--) {
 			crc_8 = (*crc8_functions[i].update_func)(crc_8, 0x55);
 		}
-		debug_break();
+		benchmark_marker_end();
 		crc_8 ^= crc8_functions[i].xorout_val;
 	}
 
 	for(size_t i = 0; i < (sizeof(crc16_functions) / sizeof(crc16_functions[0])); i++) {
 		n = iters;
 		crc_16 = crc16_functions[i].init_val;
-		debug_break();
+		benchmark_marker_start();
 		while(n--) {
 			crc_16 = (*crc16_functions[i].update_func)(crc_16, 0x55);
 		}
-		debug_break();
+		benchmark_marker_end();
 		crc_16 ^= crc16_functions[i].xorout_val;
 	}
 
 	for(size_t i = 0; i < (sizeof(crc32_functions) / sizeof(crc32_functions[0])); i++) {
 		n = iters;
 		crc_32 = crc32_functions[i].init_val;
-		debug_break();
+		benchmark_marker_start();
 		while(n--) {
 			crc_32 = (*crc32_functions[i].update_func)(crc_32, 0x55);
 		}
-		debug_break();
+		benchmark_marker_end();
 		crc_32 ^= crc32_functions[i].xorout_val;
 	}
 }
 
 void main(void) {
 	CLK_CKDIVR = 0;
-	uart_init(UART_BAUD_115200);
+	PC_DDR = (1 << PC_DDR_DDR5);
+	PC_CR1 = (1 << PC_CR1_C15);
+
+	if(ucsim_if_detect()) {
+		uart_init(UART_BAUD_115200, ucsim_if_putchar, NULL);
+	} else {
+		uart_init(UART_BAUD_115200, uart_putchar, uart_getchar);
+	}
 
 	verify();
 	benchmark(10000);

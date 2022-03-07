@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * uart.h - Header file for UART functions
+ * ucsim.c - ucSim 'simif' interface
  *
  * Copyright (c) 2020 Basil Hussain
  *
@@ -24,25 +24,47 @@
  *
  ******************************************************************************/
 
-#ifndef UART_H_
-#define UART_H_
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include "ucsim.h"
 
-typedef enum {
-	UART_BAUD_2400,
-	UART_BAUD_9600,
-	UART_BAUD_19200,
-	UART_BAUD_57600,
-	UART_BAUD_115200,
-	UART_BAUD_230400,
-	UART_BAUD_460800,
-	UART_BAUD_921600
-} uart_baud_enum_t;
+bool ucsim_if_detect(void) {
+	UCSIM_IF = UCSIM_IF_CMD_DETECT;
+	return (UCSIM_IF == UCSIM_IF_DETECT_RESP);
+}
 
-typedef int (*uart_putchar_func_t)(int c);
-typedef int (*uart_getchar_func_t)(void);
+uint8_t ucsim_if_version(void) {
+	UCSIM_IF = UCSIM_IF_CMD_IFVER;
+	return UCSIM_IF;
+}
 
-extern void uart_init(const uart_baud_enum_t baud, uart_putchar_func_t put_func, uart_getchar_func_t get_func);
-extern int uart_putchar(int c);
-extern int uart_getchar(void);
+void ucsim_if_reset(void) {
+	UCSIM_IF = UCSIM_IF_CMD_IFRESET;
+}
 
-#endif // UART_H_
+void ucsim_if_stop(void) {
+	UCSIM_IF = UCSIM_IF_CMD_STOP;
+}
+
+int ucsim_if_putchar(int c) {
+	UCSIM_IF = UCSIM_IF_CMD_PRINT;
+	UCSIM_IF = (uint8_t)c;
+	return c;
+}
+
+bool ucsim_if_fin_avail(void) {
+	UCSIM_IF = UCSIM_IF_CMD_FIN_CHECK;
+	return UCSIM_IF;
+}
+
+int ucsim_if_fin_getc(void) {
+	UCSIM_IF = UCSIM_IF_CMD_READ;
+	return UCSIM_IF;
+}
+
+int ucsim_if_fout_putc(int c) {
+	UCSIM_IF = UCSIM_IF_CMD_WRITE;
+	UCSIM_IF = c;
+	return c;
+}
