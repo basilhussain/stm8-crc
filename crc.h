@@ -44,6 +44,7 @@
 // Initial values for the various CRC implementations.
 #define CRC8_1WIRE_INIT ((uint8_t)0x0)
 #define CRC8_J1850_INIT ((uint8_t)0xFF)
+#define CRC8_AUTOSAR_INIT ((uint8_t)0xFF)
 #define CRC16_ANSI_INIT ((uint16_t)0xFFFF)
 #define CRC16_CCITT_INIT ((uint16_t)0xFFFF)
 #define CRC16_XMODEM_INIT ((uint16_t)0x0)
@@ -53,6 +54,7 @@
 // Function-like macros to return the initial value.
 #define crc8_1wire_init() CRC8_1WIRE_INIT
 #define crc8_j1850_init() CRC8_J1850_INIT
+#define crc8_autosar_init() CRC8_AUTOSAR_INIT
 #define crc16_ansi_init() CRC16_ANSI_INIT
 #define crc16_ccitt_init() CRC16_CCITT_INIT
 #define crc16_xmodem_init() CRC16_XMODEM_INIT
@@ -62,6 +64,7 @@
 // Values used to finalise the CRC, being XOR-ed with the CRC.
 #define CRC8_1WIRE_XOROUT ((uint8_t)0x0)
 #define CRC8_J1850_XOROUT ((uint8_t)0xFF)
+#define CRC8_AUTOSAR_XOROUT ((uint8_t)0xFF)
 #define CRC16_ANSI_XOROUT ((uint16_t)0x0)
 #define CRC16_CCITT_XOROUT ((uint16_t)0x0)
 #define CRC16_XMODEM_XOROUT ((uint16_t)0x0)
@@ -74,6 +77,7 @@
 // (because it has no effect).
 #define crc8_1wire_final(c) ((c) ^ CRC8_1WIRE_XOROUT)
 #define crc8_j1850_final(c) ((c) ^ CRC8_J1850_XOROUT)
+#define crc8_autosar_final(c) ((c) ^ CRC8_AUTOSAR_XOROUT)
 #define crc16_ansi_final(c) ((c) ^ CRC16_ANSI_XOROUT)
 #define crc16_ccitt_final(c) ((c) ^ CRC16_CCITT_XOROUT)
 #define crc16_xmodem_final(c) ((c) ^ CRC16_XMODEM_XOROUT)
@@ -86,6 +90,7 @@
 
 extern uint8_t crc8_1wire_update(uint8_t crc, uint8_t data) __naked __stack_args;
 extern uint8_t crc8_j1850_update(uint8_t crc, uint8_t data) __naked __stack_args;
+extern uint8_t crc8_autosar_update(uint8_t crc, uint8_t data) __naked __stack_args;
 extern uint16_t crc16_ansi_update(uint16_t crc, uint8_t data) __naked __stack_args;
 extern uint16_t crc16_ccitt_update(uint16_t crc, uint8_t data) __naked __stack_args;
 extern uint32_t crc32_update(uint32_t crc, uint8_t data) __naked __stack_args;

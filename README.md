@@ -6,6 +6,7 @@ Implementations are included for the following CRC types:
 
 * CRC8-1WIRE (aka Dallas, Maxim, iButton)
 * CRC8-SAE-J1850 (aka OBD)
+* CRC8-AUTOSAR (aka CRC8H2F)
 * CRC16-ANSI (aka IBM, Modbus, USB)
 * CRC16-CCITT
 * CRC16-XMODEM
@@ -79,6 +80,7 @@ crc = crc16_ccitt_final(crc);
 ```
 uint8_t crc8_1wire_init()
 uint8_t crc8_j1850_init()
+uint8_t crc8_autosar_init();
 uint16_t crc16_ansi_init()
 uint16_t crc16_ccitt_init()
 uint16_t crc16_xmodem_init()
@@ -87,6 +89,7 @@ uint32_t crc32_posix_init()
 
 uint8_t crc8_1wire_update(uint8_t crc, uint8_t data)
 uint8_t crc8_j1850_update(uint8_t crc, uint8_t data)
+uint8_t crc8_autosar_update(uint8_t crc, uint8_t data)
 uint16_t crc16_ansi_update(uint16_t crc, uint8_t data)
 uint16_t crc16_ccitt_update(uint16_t crc, uint8_t data)
 uint16_t crc16_xmodem_update(uint16_t crc, uint8_t data)
@@ -95,6 +98,7 @@ uint32_t crc32_posix_update(uint32_t crc, uint8_t data)
 
 uint8_t crc8_1wire_final(crc)
 uint8_t crc8_j1850_final(crc)
+uint8_t crc8_autosar_final(crc)
 uint16_t crc16_ansi_final(crc)
 uint16_t crc16_ccitt_final(crc)
 uint16_t crc16_xmodem_final(crc)
@@ -110,13 +114,14 @@ To benchmark the optimised assembly implementations, they were compared with the
 
 | Implementation |  C Cycles | ASM Cycles | Ratio |
 | -------------- | --------: | ---------: | ----: |
-| CRC8-1WIRE     | 2,040,014 |    780,022 | 38.2% |
-| CRC8-SAE-J1850 | 1,900,004 |    780,022 | 41.1% |
-| CRC16-ANSI     | 2,368,888 |  1,069,374 | 45.1% |
-| CRC16-CCITT    | 2,351,174 |  1,070,598 | 45.5% |
+| CRC8-1WIRE     | 2,030,015 |    770,023 | 37.9% |
+| CRC8-SAE-J1850 | 1,890,005 |    770,023 | 40.7% |
+| CRC8-AUTOSAR   | 1,880,011 |    770,023 | 41.0% |
+| CRC16-ANSI     | 2,318,727 |  1,059,375 | 45.7% |
+| CRC16-CCITT    | 2,371,031 |  1,060,599 | 44.7% |
 | CRC16-XMODEM†  |           |            |       |
-| CRC32          | 3,831,054 |  1,481,348 | 38.7% |
-| CRC32-POSIX    | 3,700,361 |  1,480,403 | 40.0% |
+| CRC32          | 3,851,349 |  1,481,349 | 38.5% |
+| CRC32-POSIX    | 3,700,362 |  1,480,404 | 40.0% |
 
 *(† See CCITT - algorithm is the same; only differs by initial value)*
 

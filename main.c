@@ -99,7 +99,9 @@ static const crc8_type_t crc8_functions[] = {
 	{ CRC8_1WIRE_INIT, crc8_1wire_update_ref, CRC8_1WIRE_XOROUT },
 	{ CRC8_1WIRE_INIT, crc8_1wire_update, CRC8_1WIRE_XOROUT },
 	{ CRC8_J1850_INIT, crc8_j1850_update_ref, CRC8_J1850_XOROUT },
-	{ CRC8_J1850_INIT, crc8_j1850_update, CRC8_J1850_XOROUT }
+	{ CRC8_J1850_INIT, crc8_j1850_update, CRC8_J1850_XOROUT },
+	{ CRC8_AUTOSAR_INIT, crc8_autosar_update_ref, CRC8_AUTOSAR_XOROUT },
+	{ CRC8_AUTOSAR_INIT, crc8_autosar_update, CRC8_AUTOSAR_XOROUT }
 };
 
 static const crc16_type_t crc16_functions[] = {
@@ -140,6 +142,8 @@ static const uint8_t test_data_b[] = {
 };
 
 // From SAE J1850 standard, section 5.4.1, table 1.
+// Also AUTOSAR standard document Specification of CRC Routines AUTOSAR CP R21-11, section 7.2.1.2.
+// https://www.autosar.org/fileadmin/user_upload/standards/classic/21-11/AUTOSAR_SWS_CRCLibrary.pdf
 static const uint8_t test_data_c[] = {
 	0x33, 0x22, 0x55, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF
 };
@@ -189,6 +193,14 @@ static const crc8_test_t crc8_tests[] = {
 		.c_func = { CRC8_J1850_INIT, crc8_j1850_update_ref, CRC8_J1850_XOROUT },
 		.asm_func = { CRC8_J1850_INIT, crc8_j1850_update, CRC8_J1850_XOROUT },
 		.expected = 0xCB
+	},
+	{
+		.name = "crc8-autosar",
+		.data = test_data_c,
+		.data_len = sizeof(test_data_c),
+		.c_func = { CRC8_AUTOSAR_INIT, crc8_autosar_update_ref, CRC8_AUTOSAR_XOROUT },
+		.asm_func = { CRC8_AUTOSAR_INIT, crc8_autosar_update, CRC8_AUTOSAR_XOROUT },
+		.expected = 0x11
 	}
 };
 
@@ -419,5 +431,9 @@ void main(void) {
 	verify();
 	benchmark(10000);
 
-	while(1);
+	if(ucsim_if_detect()) {
+		ucsim_if_stop();
+	} else {
+		while(1);
+	}
 }

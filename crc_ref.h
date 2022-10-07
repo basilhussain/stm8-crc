@@ -44,6 +44,7 @@
 
 extern uint8_t crc8_1wire_update_ref(uint8_t crc, uint8_t data) __stack_args;
 extern uint8_t crc8_j1850_update_ref(uint8_t crc, uint8_t data) __stack_args;
+extern uint8_t crc8_autosar_update_ref(uint8_t crc, uint8_t data) __stack_args;
 extern uint16_t crc16_ansi_update_ref(uint16_t crc, uint8_t data) __stack_args;
 extern uint16_t crc16_ccitt_update_ref(uint16_t crc, uint8_t data) __stack_args;
 extern uint32_t crc32_update_ref(uint32_t crc, uint8_t data) __stack_args;

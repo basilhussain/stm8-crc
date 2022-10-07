@@ -56,6 +56,20 @@ uint8_t crc8_j1850_update_ref(uint8_t crc, uint8_t data) __stack_args {
 	return crc;
 }
 
+uint8_t crc8_autosar_update_ref(uint8_t crc, uint8_t data) __stack_args {
+	crc ^= data;
+
+	for(uint8_t i = 0; i < 8; i++) {
+		if(crc & 0x80) {
+			crc = (crc << 1) ^ 0x2F;
+		} else {
+			crc = (crc << 1);
+		}
+	}
+
+	return crc;
+}
+
 uint16_t crc16_ansi_update_ref(uint16_t crc, uint8_t data) __stack_args {
 	crc ^= data;
 
