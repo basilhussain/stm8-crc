@@ -80,7 +80,7 @@ crc = crc16_ccitt_final(crc);
 ```
 uint8_t crc8_1wire_init()
 uint8_t crc8_j1850_init()
-uint8_t crc8_autosar_init();
+uint8_t crc8_autosar_init()
 uint16_t crc16_ansi_init()
 uint16_t crc16_ccitt_init()
 uint16_t crc16_xmodem_init()
