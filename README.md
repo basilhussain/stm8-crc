@@ -23,14 +23,21 @@ You may either use a pre-compiled version of the library, or build the library c
 
 This library has been written to accomodate and provide for both 'medium' (16-bit address space) and 'large' (24-bit address space) STM8 memory models.
 
-* If you are building your project with either no specific SDCC memory model option, or the `--model-medium` option, then use the non-suffixed `crc.lib` library file.
-* If you are building with `--model-large`, then use the `crc-large.lib` library file.
+* If you are building your project with either no specific SDCC memory model option, or the `--model-medium` option, then use one of the `.lib` library files *without* `large` suffix.
+* If you are building with `--model-large`, then use a `.lib` library file *with* `large` suffix.
 
 Unsure? If your target STM8 microcontroller model has less than 32KB of flash memory, then choose the former version; if larger flash, then you probably want the latter.
 
 ## Pre-compiled Library
 
-1. Extract the relevant `.lib` file (see above) and `crc.h` file from the release archive.
+In addition to the memory model variants mentioned above, two further variants (per memory model) of the pre-compiled `.lib` library files are provided:
+
+* **Fast**: compiled with options to trade larger code size for speed. These files are named with a `fast` suffix.
+* **Small**: compiled without such options to minimise code size at the expense of speed. These files have *no* `fast` suffix.
+
+See [Code Size](#code-size) section below for details. Once you know which `.lib` file you will be using:
+
+1. Extract the relevant `.lib` file and `crc.h` file from the release archive.
 2. Copy the two files to your project.
 
 ## Building
@@ -142,7 +149,9 @@ To attain the fastest execution, generally some trade-offs often have to be made
 * `crc32_update` (ASM): 187 bytes
 * `crc32_update_ref` (C): 95 bytes
 
-If you want to use these library functions but minimise the code size, it is possible to disable the loop unrolling by removing the `ASM_UNROLL_LOOP` macro definition from the Code::Blocks project build options and re-compiling. While this will compromise the execution speed, it should still be faster than the reference C implementations.
+However, to minimise the code size, it is possible to disable the loop unrolling by building without the `ASM_UNROLL_LOOP` macro defined. While this will compromise the execution speed, it should still be faster than the reference C implementations.
+
+There are Code::Blocks project build targets configured that will build variants of the library both with and without `ASM_UNROLL_LOOP`; the targets with are named 'Fast'. When building the 'All' virtual target, both variants are built.
 
 # Licence
 
@@ -151,3 +160,4 @@ This library is licenced under the MIT Licence. See source code headers for full
 # Contributing
 
 Bug fixes, further optimisations, or additional CRC implementations are welcome. Please create a new GitHub issue or pull request.
+
