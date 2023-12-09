@@ -25,34 +25,59 @@
 					<Add option="--model-large" />
 				</Compiler>
 			</Target>
-			<Target title="Library (Medium Fast)">
-				<Option output="crc-fast.lib" prefix_auto="0" extension_auto="0" />
+			<Target title="Library (Medium Faster)">
+				<Option output="crc-faster.lib" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
-				<Option object_output="obj/Library-Medium-Fast" />
+				<Option object_output="obj/Library-Medium-Faster" />
 				<Option type="2" />
 				<Option compiler="sdcc" />
 				<Option createDefFile="1" />
 				<Compiler>
-					<Add option="-DASM_UNROLL_LOOP" />
+					<Add option="-DALGORITHM_BITWISE_UNROLLED" />
 				</Compiler>
 			</Target>
-			<Target title="Library (Large Fast)">
-				<Option output="crc-large-fast.lib" prefix_auto="0" extension_auto="0" />
+			<Target title="Library (Large Faster)">
+				<Option output="crc-large-faster.lib" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
-				<Option object_output="obj/Library-Large-Fast" />
+				<Option object_output="obj/Library-Large-Faster" />
 				<Option type="2" />
 				<Option compiler="sdcc" />
 				<Option createDefFile="1" />
 				<Compiler>
 					<Add option="--model-large" />
-					<Add option="-DASM_UNROLL_LOOP" />
+					<Add option="-DALGORITHM_BITWISE_UNROLLED" />
+				</Compiler>
+			</Target>
+			<Target title="Library (Medium Fastest)">
+				<Option output="crc-fastest.lib" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="obj/Library-Medium-Fastest" />
+				<Option type="2" />
+				<Option compiler="sdcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-DALGORITHM_LUT" />
+					<Add option="-DALGORITHM_BITWISE_UNROLLED" />
+				</Compiler>
+			</Target>
+			<Target title="Library (Large Fastest)">
+				<Option output="crc-large-fastest.lib" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="obj/Library-Large-Fastest" />
+				<Option type="2" />
+				<Option compiler="sdcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="--model-large" />
+					<Add option="-DALGORITHM_LUT" />
+					<Add option="-DALGORITHM_BITWISE_UNROLLED" />
 				</Compiler>
 			</Target>
 			<Target title="Test">
 				<Option output="bin/Test/test.hex" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
 				<Option object_output="obj/Test/" />
-				<Option external_deps="crc-large-fast.lib;" />
+				<Option external_deps="crc-large-fastest.lib;" />
 				<Option type="5" />
 				<Option compiler="sdcc" />
 				<Compiler>
@@ -62,12 +87,12 @@
 					<Add option="-DF_CPU=16000000UL" />
 				</Compiler>
 				<Linker>
-					<Add library="crc-large-fast.lib" />
+					<Add library="crc-large-fastest.lib" />
 				</Linker>
 			</Target>
 		</Build>
 		<VirtualTargets>
-			<Add alias="All" targets="Library (Medium);Library (Large);Library (Medium Fast);Library (Large Fast);Test;" />
+			<Add alias="All" targets="Library (Medium);Library (Large);Library (Medium Faster);Library (Large Faster);Library (Medium Fastest);Library (Large Fastest);Test;" />
 		</VirtualTargets>
 		<Compiler>
 			<Add option="-mstm8" />
@@ -77,57 +102,73 @@
 		<Unit filename="crc/common.h">
 			<Option target="Library (Medium)" />
 			<Option target="Library (Large)" />
-			<Option target="Library (Medium Fast)" />
-			<Option target="Library (Large Fast)" />
+			<Option target="Library (Medium Faster)" />
+			<Option target="Library (Large Faster)" />
+			<Option target="Library (Medium Fastest)" />
+			<Option target="Library (Large Fastest)" />
 		</Unit>
 		<Unit filename="crc/crc16_ansi.c">
 			<Option compilerVar="CC" />
 			<Option target="Library (Large)" />
 			<Option target="Library (Medium)" />
-			<Option target="Library (Medium Fast)" />
-			<Option target="Library (Large Fast)" />
+			<Option target="Library (Medium Faster)" />
+			<Option target="Library (Large Faster)" />
+			<Option target="Library (Medium Fastest)" />
+			<Option target="Library (Large Fastest)" />
 		</Unit>
 		<Unit filename="crc/crc16_ccitt.c">
 			<Option compilerVar="CC" />
 			<Option target="Library (Large)" />
 			<Option target="Library (Medium)" />
-			<Option target="Library (Medium Fast)" />
-			<Option target="Library (Large Fast)" />
+			<Option target="Library (Medium Faster)" />
+			<Option target="Library (Large Faster)" />
+			<Option target="Library (Medium Fastest)" />
+			<Option target="Library (Large Fastest)" />
 		</Unit>
 		<Unit filename="crc/crc32.c">
 			<Option compilerVar="CC" />
 			<Option target="Library (Large)" />
 			<Option target="Library (Medium)" />
-			<Option target="Library (Medium Fast)" />
-			<Option target="Library (Large Fast)" />
+			<Option target="Library (Medium Faster)" />
+			<Option target="Library (Large Faster)" />
+			<Option target="Library (Medium Fastest)" />
+			<Option target="Library (Large Fastest)" />
 		</Unit>
 		<Unit filename="crc/crc32_posix.c">
 			<Option compilerVar="CC" />
 			<Option target="Library (Medium)" />
 			<Option target="Library (Large)" />
-			<Option target="Library (Medium Fast)" />
-			<Option target="Library (Large Fast)" />
+			<Option target="Library (Medium Faster)" />
+			<Option target="Library (Large Faster)" />
+			<Option target="Library (Medium Fastest)" />
+			<Option target="Library (Large Fastest)" />
 		</Unit>
 		<Unit filename="crc/crc8_1wire.c">
 			<Option compilerVar="CC" />
 			<Option target="Library (Large)" />
 			<Option target="Library (Medium)" />
-			<Option target="Library (Medium Fast)" />
-			<Option target="Library (Large Fast)" />
+			<Option target="Library (Medium Faster)" />
+			<Option target="Library (Large Faster)" />
+			<Option target="Library (Medium Fastest)" />
+			<Option target="Library (Large Fastest)" />
 		</Unit>
 		<Unit filename="crc/crc8_autosar.c">
 			<Option compilerVar="CC" />
 			<Option target="Library (Medium)" />
 			<Option target="Library (Large)" />
-			<Option target="Library (Medium Fast)" />
-			<Option target="Library (Large Fast)" />
+			<Option target="Library (Medium Faster)" />
+			<Option target="Library (Large Faster)" />
+			<Option target="Library (Medium Fastest)" />
+			<Option target="Library (Large Fastest)" />
 		</Unit>
 		<Unit filename="crc/crc8_j1850.c">
 			<Option compilerVar="CC" />
 			<Option target="Library (Medium)" />
 			<Option target="Library (Large)" />
-			<Option target="Library (Medium Fast)" />
-			<Option target="Library (Large Fast)" />
+			<Option target="Library (Medium Faster)" />
+			<Option target="Library (Large Faster)" />
+			<Option target="Library (Medium Fastest)" />
+			<Option target="Library (Large Fastest)" />
 		</Unit>
 		<Unit filename="crc_ref.c">
 			<Option compilerVar="CC" />

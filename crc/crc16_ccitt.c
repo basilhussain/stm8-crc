@@ -2,7 +2,7 @@
  *
  * crc16_ccitt.c - CRC16-CCITT implementation
  *
- * Copyright (c) 2022 Basil Hussain
+ * Copyright (c) 2023 Basil Hussain
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -68,7 +68,7 @@ uint16_t crc16_ccitt_update(uint16_t crc, uint8_t data) __naked __stack_args {
 		skip_lbl:
 	.endm
 
-#ifdef ASM_UNROLL_LOOP
+#ifdef ALGORITHM_BITWISE_UNROLLED
 
 		crc16_ccitt_update_shift_xor 0001$
 		crc16_ccitt_update_shift_xor 0002$

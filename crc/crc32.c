@@ -2,7 +2,7 @@
  *
  * crc32.c - CRC32 implementation
  *
- * Copyright (c) 2022 Basil Hussain
+ * Copyright (c) 2023 Basil Hussain
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,79 @@
 // Polynomial: x^32 + x^26 + x^23 + x^22 + x^16 + x^12 + x^11 + x^10 + x^8 + x^7 + x^5 + x^4 + x^2 + x + 1 (0xEDB88320, reversed)
 // Initial value: 0xFFFFFFFF
 // XOR out: 0xFFFFFFFF
+
+#ifdef ALGORITHM_LUT
+
+static const uint32_t crc32_lut[16] = {
+	0x00000000, 0x1DB71064, 0x3B6E20C8, 0x26D930AC,
+	0x76DC4190, 0x6B6B51F4, 0x4DB26158, 0x5005713C,
+	0xEDB88320, 0xF00F9344, 0xD6D6A3E8, 0xCB61B38C,
+	0x9B64C2B0, 0x86D3D2D4, 0xA00AE278, 0xBDBDF21C
+};
+
+uint32_t crc32_update(uint32_t crc, uint8_t data) __naked __stack_args {
+	// Avoid compiler warnings for unreferenced args.
+	(void)crc;
+	(void)data;
+
+	// For return value/arg: 0xAABBCCDD
+	// x = 0xCCDD (xh = 0xCC, xl = 0xDD)
+	// y = 0xAABB (yh = 0xAA, yl = 0xBB)
+
+	__asm
+		; XOR the LSB of the CRC with data byte and store back to CRC.
+		ld a, (ASM_ARGS_SP_OFFSET+4, sp)
+		xor a, (ASM_ARGS_SP_OFFSET+3, sp)
+		ld (ASM_ARGS_SP_OFFSET+3, sp), a
+
+		.rept 2
+			; Take least-significant nibble of CRC and use as index into LUT.
+			; But, we want it as a byte offset into the LUT. Mask the low nibble
+			; and multiply by 4.
+			ld a, (ASM_ARGS_SP_OFFSET+3, sp)
+			and a, #0x0F
+			sll a
+			sll a
+
+			; LUT offset is in A, but we need it in X to perform the lookup.
+			clrw x
+			ld xl, a
+
+			; Shift the CRC value on the stack right by 4 bits.
+			; Oh, my kingdom for a barrel shifter!
+			.rept 4
+				srl (ASM_ARGS_SP_OFFSET+0, sp)
+				rrc (ASM_ARGS_SP_OFFSET+1, sp)
+				rrc (ASM_ARGS_SP_OFFSET+2, sp)
+				rrc (ASM_ARGS_SP_OFFSET+3, sp)
+			.endm
+
+			; For each byte of the CRC on stack, XOR it with the corresponding
+			; byte of the value in LUT (loaded from offset given in X), and
+			; store it back on the stack.
+			ld a, (_crc32_lut+0, x)
+			xor a, (ASM_ARGS_SP_OFFSET+0, sp)
+			ld (ASM_ARGS_SP_OFFSET+0, sp), a
+			ld a, (_crc32_lut+1, x)
+			xor a, (ASM_ARGS_SP_OFFSET+1, sp)
+			ld (ASM_ARGS_SP_OFFSET+1, sp), a
+			ld a, (_crc32_lut+2, x)
+			xor a, (ASM_ARGS_SP_OFFSET+2, sp)
+			ld (ASM_ARGS_SP_OFFSET+2, sp), a
+			ld a, (_crc32_lut+3, x)
+			xor a, (ASM_ARGS_SP_OFFSET+3, sp)
+			ld (ASM_ARGS_SP_OFFSET+3, sp), a
+		.endm
+
+		; Load CRC value from stack into X and Y regs for function return value.
+		ldw y, (ASM_ARGS_SP_OFFSET+0, sp)
+		ldw x, (ASM_ARGS_SP_OFFSET+2, sp)
+
+		ASM_RETURN
+	__endasm;
+}
+
+#else
 
 uint32_t crc32_update(uint32_t crc, uint8_t data) __naked __stack_args {
 	// Avoid compiler warnings for unreferenced args.
@@ -76,7 +149,7 @@ uint32_t crc32_update(uint32_t crc, uint8_t data) __naked __stack_args {
 		skip_lbl:
 	.endm
 
-#ifdef ASM_UNROLL_LOOP
+#ifdef ALGORITHM_BITWISE_UNROLLED
 
 		crc32_update_shift_xor 0001$
 		crc32_update_shift_xor 0002$
@@ -107,3 +180,5 @@ uint32_t crc32_update(uint32_t crc, uint8_t data) __naked __stack_args {
 		ASM_RETURN
 	__endasm;
 }
+
+#endif

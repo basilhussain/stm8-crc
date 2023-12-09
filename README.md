@@ -13,15 +13,21 @@ Implementations are included for the following CRC types:
 * CRC32 (aka GZIP, PKZIP, PNG, ZMODEM)
 * CRC32-POSIX (aka cksum)
 
-Because this library targets the STM8 embedded microcontroller family, in order to keep the compiled code size fairly compact, the bitwise computation technique is used. Various table-lookup techniques exist that provide faster computation, but these are generally not suitable for memory-constrained embedded environments, so this library does not use them.
-
 In addition to the library functions, code is also included for plain C reference implementations of each CRC function, as well as a test and benchmarking program.
+
+Three variants of the library are available:
+
+* **Fastest**: uses lookup table calculation (where implemented, otherwise bitwise), trading larger code size for the fastest performance.
+* **Faster**: uses bitwise calculation with unrolled loops, making less of a trade-off of code size for speed.
+* **Small**: uses bitwise calculation, but without unrolled loops, to minimise code size at the expense of speed.
+
+You may choose to use the variant which best suits your performance and/or code size needs. See also [Code Size](#code-size) section below for details.
 
 # Setup
 
 You may either use a pre-compiled version of the library, or build the library code yourself. See below for further details.
 
-This library has been written to accomodate and provide for both 'medium' (16-bit address space) and 'large' (24-bit address space) STM8 memory models.
+This library has been written to accommodate and provide for both 'medium' (16-bit address space) and 'large' (24-bit address space) STM8 memory models.
 
 * If you are building your project with either no specific SDCC memory model option, or the `--model-medium` option, then use one of the `.lib` library files *without* `large` suffix.
 * If you are building with `--model-large`, then use a `.lib` library file *with* `large` suffix.
@@ -30,12 +36,18 @@ Unsure? If your target STM8 microcontroller model has less than 32KB of flash me
 
 ## Pre-compiled Library
 
-In addition to the memory model variants mentioned above, two further variants (per memory model) of the pre-compiled `.lib` library files are provided:
+Library files for each combination of performance variant and memory model are provided. The selection of provided pre-compiled `.lib` files is as follows:
 
-* **Fast**: compiled with options to trade larger code size for speed. These files are named with a `fast` suffix.
-* **Small**: compiled without such options to minimise code size at the expense of speed. These files have *no* `fast` suffix.
+| Variant | Memory Model | Library Filename        |
+| ------- | ------------ | ----------------------- |
+| Fastest | Medium       | `crc-fastest.lib`       |
+| Fastest | Large        | `crc-large-fastest.lib` |
+| Faster  | Medium       | `crc-faster.lib`        |
+| Faster  | Large        | `crc-large-faster.lib`  |
+| Small   | Medium       | `crc.lib`               |
+| Small   | Large        | `crc-large.lib`         |
 
-See [Code Size](#code-size) section below for details. Once you know which `.lib` file you will be using:
+Once you have chosen which `.lib` file you will use:
 
 1. Extract the relevant `.lib` file and `crc.h` file from the release archive.
 2. Copy the two files to your project.
@@ -45,7 +57,7 @@ See [Code Size](#code-size) section below for details. Once you know which `.lib
 This library is developed and built with the [Code::Blocks](http://codeblocks.org/) IDE and [SDCC](http://sdcc.sourceforge.net/) compiler.
 
 1. Load the `.cbp` project file in Code::Blocks.
-2. Select the appropriate 'Library' build target for your STM8 memory model (see above) from the drop-down list on the compiler toolbar (or the *Build > Select Target* menu).
+2. Select the appropriate 'Library' build target for your chosen variant and STM8 memory model (see above) from the drop-down list on the compiler toolbar (or the *Build > Select Target* menu).
 3. Build the library by pressing the 'Build' icon on the compiler toolbar (or Ctrl-F9 keyboard shortcut, or *Build > Build* menu entry).
 4. Upon successful compilation, the resultant `.lib` file will be in the main base folder.
 5. Copy the `.lib` file and the `crc.h` file to your project.
@@ -55,7 +67,7 @@ This library is developed and built with the [Code::Blocks](http://codeblocks.or
 1. Include the `crc.h` file in your C code wherever you want to use the CRC functions.
 2. When compiling, provide the path to the `.lib` file with the `-l` SDCC command-line option.
 
-For each CRC type, there are two functions provided: one that gives the appropriate initial value for that CRC variant, and one for incrementally computing the CRC on a byte-by-byte basis.
+For each CRC type, there are three functions provided: one that gives the appropriate initial value for that CRC variant, one for incrementally computing the CRC on a byte-by-byte basis, and one for finalising the CRC value.
 
 To calculate a CRC:
 
@@ -117,18 +129,18 @@ Note: the 'init' functions are actually macro definitions, so you may use them a
 
 # Benchmarks
 
-To benchmark the optimised assembly implementations, they were compared with the execution speed of equivalent plain C implementations. Each function was run for 10,000 iterations, on each iteration updating the CRC value with a fixed data byte of `0x55`. Code was compiled using SDCC's default 'balanced' optimisation level. The benchmark was ran using the [μCsim](http://mazsola.iit.uni-miskolc.hu/~drdani/embedded/ucsim/) microcontroller simulator included with SDCC. The number of clock cycles consumed by all iterations of the loop (but not including initial value assignment or final XOR-out) was measured using the timer commands of μCsim.
+To benchmark the fastest optimised assembly implementations, they were compared with the execution speed of equivalent plain C implementations. Each function was run for 10,000 iterations, on each iteration updating the CRC value with a fixed data byte of `0x55`. Code was compiled using SDCC's default 'balanced' optimisation level. The benchmark was ran using the [μCsim](http://mazsola.iit.uni-miskolc.hu/~drdani/embedded/ucsim/) microcontroller simulator included with SDCC. The number of clock cycles consumed by all iterations of the loop (but not including initial value assignment or final XOR-out) was measured using the timer commands of μCsim.
 
-| Implementation |  C Cycles | ASM Cycles | Ratio |
+| CRC Type       |  C Cycles | ASM Cycles | Ratio |
 | -------------- | --------: | ---------: | ----: |
-| CRC8-1WIRE     | 2,030,015 |    770,023 | 37.9% |
-| CRC8-SAE-J1850 | 1,890,005 |    770,023 | 40.7% |
-| CRC8-AUTOSAR   | 1,880,011 |    770,023 | 41.0% |
-| CRC16-ANSI     | 2,318,727 |  1,059,375 | 45.7% |
-| CRC16-CCITT    | 2,371,031 |  1,060,599 | 44.7% |
+| CRC8-1WIRE     | 1,750,009 |    700,017 | 40.0% |
+| CRC8-SAE-J1850 | 1,649,999 |    700,017 | 42.4% |
+| CRC8-AUTOSAR   | 1,650,005 |    700,017 | 42.4% |
+| CRC16-ANSI     | 2,188,720 |    979,368 | 44.7% |
+| CRC16-CCITT    | 2,121,168 |    980,592 | 46.2% |
 | CRC16-XMODEM†  |           |            |       |
-| CRC32          | 3,851,349 |  1,481,349 | 38.5% |
-| CRC32-POSIX    | 3,700,362 |  1,480,404 | 40.0% |
+| CRC32          | 3,101,488 |  1,250,018 | 40.3% |
+| CRC32-POSIX    | 3,010,438 |  1,250,018 | 41.5% |
 
 *(† See CCITT - algorithm is the same; only differs by initial value)*
 
@@ -140,18 +152,25 @@ For the code used in the reference C implementations, see the `crc_ref.c` file. 
 
 # Code Size
 
-To attain the fastest execution, generally some trade-offs often have to be made, and in the case of this library, it is at the expense of compiled code size. Primarily due to the use of loop-unrolling, the size of the assembly CRC functions are larger than their reference C counterparts, but not by an egregious amount - typically only roughly twice the size. Some selected examples:
+For the faster and fastest performing variants of this library, generally some trade-offs often have to be made, and in the case of these variants, it is at the expense of compiled code size. Primarily due to the use of lookup tables (LUTs) and/or loop-unrolling, the size of the assembly CRC functions are much larger than their reference C counterparts, but not by an egregious amount - typically only around twice the size.
 
-* `crc8_1wire_update` (ASM): 45 bytes
-* `crc8_1wire_update_ref` (C): 41 bytes
-* `crc16_ansi_update` (ASM): 89 bytes
-* `crc16_ansi_update_ref` (C): 45 bytes
-* `crc32_update` (ASM): 187 bytes
-* `crc32_update_ref` (C): 95 bytes
+Some selected comparisons of size of 'update' functions (in bytes):
 
-However, to minimise the code size, it is possible to disable the loop unrolling by building without the `ASM_UNROLL_LOOP` macro defined. While this will compromise the execution speed, it should still be faster than the reference C implementations.
+| CRC Type    | Reference C | Fastest | Faster | Small |
+| ----------- | ----------: | ------: | -----: | ----: |
+| CRC8-1WIRE  |          39 |      45 |     45 |    16 |
+| CRC16-ANSI  |          45 |      89 |     89 |    24 |
+| CRC16-CCITT |          46 |      89 |     89 |    24 |
+| CRC32       |          95 |    †211 |    187 |    38 |
+| CRC32-POSIX |          93 |    †211 |    187 |    38 |
 
-There are Code::Blocks project build targets configured that will build variants of the library both with and without `ASM_UNROLL_LOOP`; the targets with are named 'Fast'. When building the 'All' virtual target, both variants are built.
+*(† Includes size of associated lookup table)*
+
+The 'Fastest' variant is built with both `ALGORITHM_LUT` and `ALGORITHM_BITWISE_UNROLLED` defined. These definitions enable a lookup-table (LUT) based algorithm, or where not available (not all CRC types have it) a bitwise algorithm with unrolled loops.
+
+The 'Faster' variant is built only with `ALGORITHM_BITWISE_UNROLLED` defined, so only bitwise algorithms with unrolled loops are enabled - no LUT algorithms.
+
+The 'Small' variant is built with neither of the above definitions, so only looped bitwise algorithms are used. While this will compromise the execution speed, it may still be faster than the reference C implementations.
 
 # Licence
 
@@ -160,4 +179,3 @@ This library is licenced under the MIT Licence. See source code headers for full
 # Contributing
 
 Bug fixes, further optimisations, or additional CRC implementations are welcome. Please create a new GitHub issue or pull request.
-

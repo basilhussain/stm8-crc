@@ -2,7 +2,7 @@
  *
  * crc8_1wire.c - CRC8-1WIRE implementation
  *
- * Copyright (c) 2022 Basil Hussain
+ * Copyright (c) 2023 Basil Hussain
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -59,7 +59,7 @@ uint8_t crc8_1wire_update(uint8_t crc, uint8_t data) __naked __stack_args {
 		skip_lbl:
 	.endm
 
-#ifdef ASM_UNROLL_LOOP
+#ifdef ALGORITHM_BITWISE_UNROLLED
 
 		crc8_1wire_update_shift_xor 0001$
 		crc8_1wire_update_shift_xor 0002$
